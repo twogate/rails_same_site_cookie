@@ -12,9 +12,12 @@ module RailsSameSiteCookie
     def call(env)
       status, headers, body = @app.call(env)
 
+      enabled = RailsSameSiteCookie.configuration.same_site_none_enabled
+
       regex = RailsSameSiteCookie.configuration.user_agent_regex
       set_cookie = headers['Set-Cookie']
-      if (regex.nil? or regex.match(env['HTTP_USER_AGENT'])) and not (set_cookie.nil? or set_cookie.strip == '')
+
+      if enabled && (regex.nil? or regex.match(env['HTTP_USER_AGENT'])) and not (set_cookie.nil? or set_cookie.strip == '')
         parser = UserAgentChecker.new(env['HTTP_USER_AGENT'])
         if parser.send_same_site_none?
           cookies = set_cookie.split(COOKIE_SEPARATOR)
